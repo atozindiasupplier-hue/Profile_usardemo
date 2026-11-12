@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horizon Gym - User Profile</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #0d100f;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .profile-card {
+      background-color: #171a19;
+      width: 100%;
+      max-width: 390px;
+      padding: 26px 20px;
+      border-radius: 18px;
+      border: 1px solid #262a29;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .brand-header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #5eead4;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-header p {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: #cbd5e1;
+      margin-bottom: 5px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 1px solid #333836;
+      background-color: #0d100f;
+      color: #ffffff;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: #5eead4;
+    }
+
+    .row-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .row-group .form-group {
+      flex: 1;
+    }
+
+    .btn-save {
+      width: 100%;
+      padding: 13px;
+      background-color: #5eead4;
+      color: #0d100f;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .btn-save:active {
+      background-color: #2dd4bf;
+    }
+
+    .status-box {
+      display: none;
+      margin-top: 14px;
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .status-success {
+      display: block;
+      background-color: rgba(34, 197, 94, 0.15);
+      border: 1px solid #22c55e;
+      color: #4ade80;
+    }
+
+    .status-error {
+      display: block;
+      background-color: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      color: #f87171;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="profile-card">
+    <div class="brand-header">
+      <h1>MEMBER PROFILE</h1>
+      <p>Manage your personal details</p>
+    </div>
+
+    <form id="profileForm">
+      <!-- Full Name -->
+      <div class="form-group">
+        <label for="fullName">Full Name</label>
+        <input type="text" id="fullName" placeholder="Enter your full name" required />
+      </div>
+
+      <!-- Email ID -->
+      <div class="form-group">
+        <label for="emailId">Email ID</label>
+        <input type="email" id="emailId" placeholder="Enter your email address" required />
+      </div>
+
+      <!-- Age & Pin Code (Side by Side) -->
+      <div class="row-group">
+        <div class="form-group">
+          <label for="age">Age</label>
+          <input type="number" id="age" placeholder="Age" required />
+        </div>
+        <div class="form-group">
+          <label for="pincode">Pin Code</label>
+          <input type="text" id="pincode" placeholder="Pin Code" maxlength="6" required />
+        </div>
+      </div>
+
+      <!-- Village -->
+      <div class="form-group">
+        <label for="village">Village / Area</label>
+        <input type="text" id="village" placeholder="Enter your village or area" required />
+      </div>
+
+      <button type="submit" class="btn-save" id="saveBtn">Save Profile</button>
+    </form>
+
+    <div id="statusBox" class="status-box"></div>
+  </div>
+
+  <script>
+    const profileForm = document.getElementById('profileForm');
+    const saveBtn = document.getElementById('saveBtn');
+    const statusBox = document.getElementById('statusBox');
+
+    // Yahan apna Profile Save karne ka Single API URL daal dena
+    const PROFILE_API_URL = '';
+
+    profileForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const fullName = document.getElementById('fullName').value.trim();
+      const emailId = document.getElementById('emailId').value.trim();
+      const age = document.getElementById('age').value.trim();
+      const pincode = document.getElementById('pincode').value.trim();
+      const village = document.getElementById('village').value.trim();
+
+      saveBtn.textContent = 'Saving to Database...';
+      saveBtn.disabled = true;
+      statusBox.style.display = 'none';
+
+      try {
+        const response = await fetch(PROFILE_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fullName, emailId, age, pincode, village })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          statusBox.textContent = '✅ Profile Saved Successfully!';
+          statusBox.className = 'status-box status-success';
+        } else {
+          statusBox.textContent = data.message || '❌ Failed to save profile';
+          statusBox.className = 'status-box status-error';
+        }
+      } catch (error) {
+        statusBox.textContent = '⚠️ API Connection Error (Connect PROFILE_API_URL)';
+        statusBox.className = 'status-box status-error';
+      } finally {
+        saveBtn.textContent = 'Save Profile';
+        saveBtn.disabled = false;
+      }
+    });
+  </script>
+
+</body>
+  </html>
+  
