@@ -177,32 +177,44 @@
     const saveBtn = document.getElementById('saveBtn');
     const statusBox = document.getElementById('statusBox');
 
-    // Yahan apna Profile Save karne ka Single API URL daal dena
-    const PROFILE_API_URL = '';
+    const PROFILE_API_URL = 'https://gym-backend-rfvv.onrender.com/api/user/complete-profile';
 
     profileForm.addEventListener('submit', async function (e) {
       e.preventDefault();
 
       const fullName = document.getElementById('fullName').value.trim();
-      const emailId = document.getElementById('emailId').value.trim();
+      const email = document.getElementById('emailId').value.trim();
       const age = document.getElementById('age').value.trim();
       const pincode = document.getElementById('pincode').value.trim();
       const village = document.getElementById('village').value.trim();
+
+      const token = localStorage.getItem('token') || localStorage.getItem('jwtToken') || '';
 
       saveBtn.textContent = 'Saving to Database...';
       saveBtn.disabled = true;
       statusBox.style.display = 'none';
 
       try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(PROFILE_API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fullName, emailId, age, pincode, village })
+          headers,
+          body: JSON.stringify({
+            fullName,
+            email,
+            age,
+            pincode,
+            village
+          })
         });
 
         const data = await response.json();
 
-        if (response.ok && data.success) {
+        if (response.ok && (data.success || data.status === 'success' || data.user || data.data)) {
           statusBox.textContent = '✅ Profile Saved Successfully!';
           statusBox.className = 'status-box status-success';
         } else {
@@ -210,7 +222,7 @@
           statusBox.className = 'status-box status-error';
         }
       } catch (error) {
-        statusBox.textContent = '⚠️ API Connection Error (Connect PROFILE_API_URL)';
+        statusBox.textContent = '⚠️ API Connection Error';
         statusBox.className = 'status-box status-error';
       } finally {
         saveBtn.textContent = 'Save Profile';
@@ -220,5 +232,4 @@
   </script>
 
 </body>
-  </html>
-  
+</html>
